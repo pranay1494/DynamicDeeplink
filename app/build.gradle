@@ -20,11 +20,11 @@ android {
     productFlavors {
         appin {
             dimension "package"
-            generateData("www.xyz.in", listOfDeepLinkUrls, locales, ["www.xyz.in"])
+            manifestPlaceholders = [hostName: "www.xyz.in", deepLinks_manifestPlaceholder: generateData("www.xyz.in", listOfDeepLinkUrls, locales, ["www.xyz.in"])]
         }
         appza {
             dimension "package"
-            generateData("www.xyz.co.za", listOfDeepLinkUrls, locales, ["www.xyz.co.za"])
+            manifestPlaceholders = [hostName: "www.xyz.in", deepLinks_manifestPlaceholder: generateData("www.xyz.in", listOfDeepLinkUrls, locales, ["www.xyz.in"])]
         }
     }
 

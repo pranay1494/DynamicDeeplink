@@ -49,16 +49,17 @@ android.applicationVariants.all { variant ->
                         }
                         def manifestDirPath = manifestOutputDirectory.asFile.get()
                         String manifestMergerpath = "$manifestDirPath/AndroidManifest.xml"
-
-                        def link = manifestDirPath.toString()
-                        link = link.replace("merged_manifests","bundle_manifest")
-                        def productFlavor = link.split("/bundle_manifest/").getAt(1)
-                        def upper = productFlavor.capitalize()
-                        productFlavor = "process$upper" +"Manifest"
-                        link = link + "/$productFlavor/bundle-manifest/AndroidManifest.xml"
+                        print(manifestMergerpath)
+                        print(placeholders)
+//                        def link = manifestDirPath.toString()
+//                        link = link.replace("merged_manifests","bundle_manifest")
+//                        def productFlavor = link.split("/bundle_manifest/").getAt(1)
+//                        def upper = productFlavor.capitalize()
+//                        productFlavor = "process$upper" +"Manifest"
+//                        link = link + "/$productFlavor/bundle-manifest/AndroidManifest.xml"
 
                         writeManifest(manifestMergerpath,placeholders)
-                        writeManifest(link,placeholders)
+//                        writeManifest(link,placeholders)
                 }
         }
 }
