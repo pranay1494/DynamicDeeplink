@@ -1,0 +1,74 @@
+import java.util.regex.Pattern
+
+ext {
+        listOfDeepLinkUrls = new ArrayList<String>()
+        listOfDeepLinkUrls.add("/home")
+        locales = ["en", "ar", "es", "hi-IN"]
+    }
+
+ext.generateData = { host, listOfDeepLinkUrls, locales,listOfDomains ->
+        String links = ""
+        listOfDeepLinkUrls.each{ item ->
+                links += data(item,host)
+                locales.each{ locale ->
+                        listOfDomains.each { domain ->
+                                links += data("/"+locale.replace("_","-")+item,domain)
+                        }
+                }
+        }
+        print(links)
+        return links
+}
+
+static def data(String path, String host) {
+        return http(path,host) + https(path,host)
+}
+
+static def http(String path, String host) {
+        return "\n" +
+                "               <data\n" +
+                "                   android:host=\"$host\"\n" +
+                "                   android:pathPrefix=\"$path\"\n" +
+                "                   android:scheme=\"http\"/>\n"
+}
+
+static def https(String path, String host) {
+        return "\n" +
+                "               <data\n" +
+                "                   android:host=\"$host\"\n" +
+                "                   android:pathPrefix=\"$path\"\n" +
+                "                   android:scheme=\"https\"/>\n"
+}
+
+android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+                output.processManifest.doLast {
+                        def placeholders = variant.mergedFlavor.manifestPlaceholders;
+                        if (placeholders == null || placeholders.isEmpty()) {
+                                return
+                        }
+                        def manifestDirPath = manifestOutputDirectory.asFile.get()
+                        String manifestMergerpath = "$manifestDirPath/AndroidManifest.xml"
+
+                        def link = manifestDirPath.toString()
+                        link = link.replace("merged_manifests","bundle_manifest")
+                        def productFlavor = link.split("/bundle_manifest/").getAt(1)
+                        def upper = productFlavor.capitalize()
+                        productFlavor = "process$upper" +"Manifest"
+                        link = link + "/$productFlavor/bundle-manifest/AndroidManifest.xml"
+
+                        writeManifest(manifestMergerpath,placeholders)
+                        writeManifest(link,placeholders)
+                }
+        }
+}
+def writeManifest(String manifestPath,HashMap placeholders){
+        def manifestContent = file(manifestPath).getText()
+        placeholders.each { key, value ->
+                if(key.equals("deepLinks_manifestPlaceholder")) {
+                        Pattern pattern = Pattern.compile(Pattern.quote("deepLinks_manifestPlaceholder"), Pattern.DOTALL);
+                        manifestContent = pattern.matcher(manifestContent).replaceAll(value);
+                }
+        }
+        file(manifestPath).write(manifestContent)
+}
